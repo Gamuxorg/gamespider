@@ -2,7 +2,10 @@
 from pyquery import PyQuery as pq
 import urllib.parse
 import urllib.request
-import os,time
+import os, time
+import socket  
+  
+socket.setdefaulttimeout(200)
 
 URLFIRST = "https://rutracker.org/forum/viewforum.php?f=1992"
 currentpath = os.path.abspath('.')
@@ -10,6 +13,7 @@ listpagepath = os.path.join(currentpath, 'list')
 outputpath = os.path.join(currentpath, 'rutracker-output')
 outputfile = os.path.join(outputpath, 'output.txt')
 gamelist = {}
+gameindex = 0
 if not os.path.exists(listpagepath):
     os.mkdir(listpagepath)
 
@@ -33,6 +37,7 @@ def CachePage(IndexPageNum=1):
 
 
 def CacheMagnet():
+    global gameindex
     htmldom = pq(URLFIRST)
     indexnum = htmldom('a.pg').eq(-2).text()
     indexnum = int(indexnum)
@@ -52,13 +57,18 @@ def CacheMagnet():
             for m in range(0, gamelistnum):
                 innerhref = htmldata('a.tt-text').eq(m).attr('href')
                 innerurl = 'https://rutracker.org/forum/' + innerhref
-                innerdom = pq(url = innerurl)
+                headers = {
+                    'User-Agent': 'User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+                innerreq = urllib.request.Request(innerurl, headers=headers)
+                innerdom = pq(urllib.request.urlopen(innerreq).read().decode("Windows-1251"))
                 op = open(outputfile, 'a', encoding='utf-8')
                 gamelist['size'] = htmldata('a.dl-stub').eq(m).text()
                 gamelist['name'] = innerdom('div.post_body').children('span').eq(0).text()
                 gamelist['magnet'] = innerdom('a.magnet-link').attr('href')
                 op.write(str(gamelist))
                 op.close
+                gameindex = gameindex + 1
+                print(gameindex)
                 time.sleep(2)
             htmlfile.close()
 
