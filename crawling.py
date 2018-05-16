@@ -13,7 +13,7 @@ listpagepath = os.path.join(currentpath, 'list')
 outputpath = os.path.join(currentpath, 'rutracker-output')
 outputfile = os.path.join(outputpath, 'output.txt')
 gamelist = {}
-gameindex = 0
+output = {}
 if not os.path.exists(listpagepath):
     os.mkdir(listpagepath)
 
@@ -36,8 +36,8 @@ def CachePage(IndexPageNum=1):
     print("第" + str(IndexPageNum + 1) + "页已获取完毕！")
 
 
-def CacheMagnet():
-    global gameindex
+def CacheMagnet(indexnum = 0):
+    gameindex = indexnum
     htmldom = pq(URLFIRST)
     indexnum = htmldom('a.pg').eq(-2).text()
     indexnum = int(indexnum)
@@ -67,9 +67,9 @@ def CacheMagnet():
                 gamelist['magnet'] = innerdom('a.magnet-link').attr('href')
                 op.write(str(gamelist))
                 op.close
-                gameindex = gameindex + 1
                 print(gameindex)
-                time.sleep(2)
+                gameindex = gameindex + 1
+                time.sleep(3)
             htmlfile.close()
 
 
